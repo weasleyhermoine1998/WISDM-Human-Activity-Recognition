@@ -1,0 +1,1 @@
+# WISDM-Human-Activity-Recognition
