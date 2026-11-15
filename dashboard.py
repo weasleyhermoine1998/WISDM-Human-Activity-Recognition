@@ -23,6 +23,141 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+
+# ---------------------------------------------------------------------
+# Visual theme: Minimal Academic (white + navy + blue/teal accents)
+# ---------------------------------------------------------------------
+st.markdown(
+    """
+    <style>
+    :root {
+        --wisdm-navy: #142B4A;
+        --wisdm-blue: #2878B8;
+        --wisdm-teal: #22A6A1;
+        --wisdm-ink: #243447;
+        --wisdm-muted: #66788A;
+        --wisdm-border: #E4EAF1;
+        --wisdm-surface: #FFFFFF;
+        --wisdm-page: #F5F8FC;
+    }
+    [data-testid="stAppViewContainer"] {
+        background: var(--wisdm-page);
+        color: var(--wisdm-ink);
+    }
+    [data-testid="stHeader"] { background: rgba(245, 248, 252, 0.92); }
+    .block-container {
+        max-width: 1440px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }
+    h1, h2, h3 {
+        color: var(--wisdm-navy) !important;
+        letter-spacing: -0.025em;
+    }
+    h1 { font-weight: 800 !important; padding-bottom: 0.25rem; }
+    h2, h3 { font-weight: 700 !important; }
+    [data-testid="stCaptionContainer"] { color: var(--wisdm-muted); }
+
+    [data-testid="stSidebar"] {
+        background: var(--wisdm-navy);
+        border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    [data-testid="stSidebar"] * { color: #F4F8FC; }
+    [data-testid="stSidebar"] [data-testid="stFileUploader"] section {
+        background: rgba(255,255,255,0.09);
+        border: 1px dashed rgba(255,255,255,0.38);
+        border-radius: 12px;
+    }
+    [data-testid="stSidebar"] [data-testid="stFileUploader"] button {
+        color: var(--wisdm-navy) !important;
+    }
+
+    [data-testid="stMetric"] {
+        background: var(--wisdm-surface);
+        border: 1px solid var(--wisdm-border);
+        border-radius: 16px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 5px 18px rgba(20, 43, 74, 0.055);
+    }
+    [data-testid="stMetricLabel"] {
+        color: var(--wisdm-muted) !important;
+        font-weight: 600;
+    }
+    [data-testid="stMetricValue"] {
+        color: var(--wisdm-navy) !important;
+        font-weight: 800;
+    }
+    [data-testid="stExpander"] {
+        background: var(--wisdm-surface);
+        border: 1px solid var(--wisdm-border);
+        border-radius: 14px;
+    }
+    [data-testid="stDataFrame"], [data-testid="stTable"] {
+        border: 1px solid var(--wisdm-border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    [data-testid="stPlotlyChart"] {
+        background: var(--wisdm-surface);
+        border: 1px solid var(--wisdm-border);
+        border-radius: 16px;
+        padding: 0.45rem;
+        box-shadow: 0 4px 16px rgba(20, 43, 74, 0.045);
+    }
+    div.stButton > button, div[data-testid="stDownloadButton"] button {
+        background: var(--wisdm-blue);
+        color: white;
+        border: 0;
+        border-radius: 10px;
+        font-weight: 650;
+    }
+    div.stButton > button:hover, div[data-testid="stDownloadButton"] button:hover {
+        background: var(--wisdm-navy);
+        color: white;
+        border: 0;
+    }
+    hr { border-color: var(--wisdm-border); margin: 1.5rem 0; }
+    @media (max-width: 800px) {
+        .block-container {
+            padding-top: 1.1rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# High-contrast, color-blind-conscious palette: each plotted signal gets a
+# clearly distinguishable color, including all 9 traces in activity comparisons.
+WISDM_COLORS = [
+    "#0072B2",  # blue
+    "#E69F00",  # orange
+    "#D55E00",  # vermilion
+    "#CC79A7",  # pink
+    "#009E73",  # green
+    "#56B4E9",  # sky blue
+    "#F0E442",  # yellow
+    "#7A3E9D",  # purple
+    "#333333",  # charcoal
+]
+
+def style_chart(fig):
+    fig.update_layout(
+        template="plotly_white",
+        colorway=WISDM_COLORS,
+        font={"family": "Arial, sans-serif", "color": "#243447", "size": 12},
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        hoverlabel={"bgcolor": "#142B4A", "font": {"color": "#FFFFFF", "size": 12}},
+        legend={"bgcolor": "rgba(255,255,255,0.75)", "borderwidth": 0},
+    )
+    fig.update_xaxes(showgrid=False, zeroline=False, linecolor="#DCE4ED")
+    fig.update_yaxes(gridcolor="#E8EEF5", zeroline=False, linecolor="#DCE4ED")
+    return fig
+
+
 st.title("داشبورد تعاملی تشخیص فعالیت انسانی | WISDM")
 st.caption("PT1 — تحلیل اکتشافی سیگنال‌های شتاب‌سنج، مقایسهٔ افراد و پنجره‌های زمانی")
 
@@ -94,6 +229,7 @@ with left:
     activity_counts = data.activity.value_counts().reindex(ACTIVITY_ORDER, fill_value=0)
     fig = go.Figure(go.Bar(x=activity_counts.index, y=activity_counts.values))
     fig.update_layout(xaxis_title="فعالیت", yaxis_title="تعداد رکورد", height=380, margin=dict(t=20, b=20))
+    style_chart(fig)
     st.plotly_chart(fig, use_container_width=True)
 with right:
     st.subheader("رکوردهای هر شرکت‌کننده")
@@ -101,6 +237,7 @@ with right:
     fig = go.Figure(go.Bar(x=subject_counts.index.astype(str), y=subject_counts.values))
     fig.update_layout(xaxis_title="شناسهٔ شرکت‌کننده", yaxis_title="تعداد رکورد", height=380,
                       xaxis_tickangle=-45, margin=dict(t=20, b=20))
+    style_chart(fig)
     st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
@@ -126,7 +263,7 @@ if rows:
                         vertical_spacing=0.09)
     x = np.arange(signal.shape[0])
     for axis_i, axis_name in enumerate(AXES):
-        fig.add_trace(go.Scatter(x=x, y=signal[:, axis_i], mode="lines", name=axis_name), row=axis_i + 1, col=1)
+        fig.add_trace(go.Scatter(x=x, y=signal[:, axis_i], mode="lines", name=axis_name, line={"width": 2.4}), row=axis_i + 1, col=1)
         fig.update_yaxes(title_text="شتاب", row=axis_i + 1, col=1)
     fig.update_xaxes(title_text="شمارهٔ نمونه در پنجره", row=3, col=1)
     global_min = float(data[AXES].min().min())
@@ -134,6 +271,7 @@ if rows:
     fig.update_yaxes(range=[global_min, global_max])
     fig.update_layout(height=650, title=f"{selected_activity} | شرکت‌کننده {signal_user} | پنجره {window_position}",
                       showlegend=False, margin=dict(t=70, b=30))
+    style_chart(fig)
     st.plotly_chart(fig, use_container_width=True)
 else:
     st.warning("برای این فعالیت پنجره‌ای با طول ۵۱ نمونه وجود ندارد.")
@@ -167,7 +305,7 @@ if compare_activities:
                 fig.add_trace(go.Scatter(
                     x=np.arange(51), y=X_windows[idx, :, axis_i],
                     mode="lines", name=f"{activity} — {axis_name}",
-                    legendgroup=activity,
+                    line={"width": 2.4}, legendgroup=activity,
                 ), row=axis_i + 1, col=1)
             if compare_user_choice != "اولین فرد دارای فعالیت" and user_used != int(compare_user_choice):
                 notes.append(f"{activity}: کاربر انتخابی داده ندارد؛ از کاربر {user_used} استفاده شد.")
@@ -180,6 +318,7 @@ if compare_activities:
     global_max = float(data[AXES].max().max())
     fig.update_yaxes(range=[global_min, global_max])
     fig.update_layout(height=720, title="مقایسهٔ هم‌زمان سیگنال‌ها با مقیاس عمودی مشترک", margin=dict(t=65, b=30))
+    style_chart(fig)
     st.plotly_chart(fig, use_container_width=True)
     for note in notes:
         st.caption(note)
@@ -207,13 +346,14 @@ if selected_subjects:
         for axis_i, axis_name in enumerate(AXES):
             fig.add_trace(go.Scatter(
                 x=np.arange(51), y=X_windows[idx, :, axis_i], mode="lines",
-                name=f"User {user} — {axis_name}", legendgroup=f"user{user}"
+                name=f"User {user} — {axis_name}", line={"width": 2.4}, legendgroup=f"user{user}"
             ), row=axis_i + 1, col=1)
     fig.update_xaxes(title_text="شمارهٔ نمونه در پنجره", row=3, col=1)
     global_min = float(data[AXES].min().min())
     global_max = float(data[AXES].max().max())
     fig.update_yaxes(range=[global_min, global_max])
     fig.update_layout(height=720, title=f"{subject_activity}: مقایسهٔ افراد با مقیاس مشترک")
+    style_chart(fig)
     st.plotly_chart(fig, use_container_width=True)
 else:
     st.info("برای مشاهده، دست‌کم یک شرکت‌کننده انتخاب کنید.")
