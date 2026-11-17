@@ -1,0 +1,4 @@
+﻿split,participants,windows,Walking_windows,Jogging_windows,Upstairs_windows,Downstairs_windows,Sitting_windows,Standing_windows
+train,22,19959,8482,5234,2337,1873,1106,927
+validation,7,6879,2786,1699,1018,656,418,302
+test,7,6288,2932,1540,623,648,241,304
