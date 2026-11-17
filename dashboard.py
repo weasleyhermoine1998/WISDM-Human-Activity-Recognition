@@ -7,6 +7,7 @@ from pathlib import Path
 import hashlib
 import os
 import tempfile
+import gdown
 
 import numpy as np
 import pandas as pd
@@ -177,26 +178,65 @@ def cached_windows(path: str, mtime: float, window_size: int = 51, step: int = 2
     return windows, metadata
 
 
+
 st.sidebar.header("منبع داده")
-default_path = Path(os.environ.get("WISDM_DATA_PATH", "data/WISDM_ar_v1.1_raw.txt"))
-uploaded = st.sidebar.file_uploader("فایل خام WISDM (اختیاری)", type=["txt", "csv"])
+
+default_path = Path(
+    os.environ.get("WISDM_DATA_PATH", "data/WISDM_ar_v1.1_raw.txt")
+)
+
+uploaded = st.sidebar.file_uploader(
+    "فایل خام WISDM (اختیاری)",
+    type=["txt", "csv"]
+)
 
 if uploaded is not None:
     payload = uploaded.getvalue()
     digest = hashlib.sha256(payload).hexdigest()[:16]
     temp_path = Path(tempfile.gettempdir()) / f"wisdm_upload_{digest}.txt"
+
     if not temp_path.exists() or temp_path.stat().st_size != len(payload):
         temp_path.write_bytes(payload)
+
     data_path = temp_path
+
 else:
-    data_path = default_path
+    if default_path.exists():
+        data_path = default_path
+    else:
+        drive_file_id = "1fbGo9y1y0kNO2qiFQYEuxxcSFpq8U0Pt"
+        download_path = Path(tempfile.gettempdir()) / "WISDM_ar_v1.1_raw.txt"
+
+        try:
+            if not download_path.exists() or download_path.stat().st_size == 0:
+                with st.spinner("در حال دریافت دیتاست از Google Drive..."):
+                    result = gdown.download(
+                        id=drive_file_id,
+                        output=str(download_path),
+                        quiet=False
+                    )
+
+                if result is None or not download_path.exists():
+                    raise RuntimeError("دانلود فایل از Google Drive ناموفق بود.")
+
+            if download_path.stat().st_size == 0:
+                raise RuntimeError("فایل دانلودشده خالی است.")
+
+            data_path = download_path
+            st.sidebar.success("دیتاست با موفقیت دریافت شد.")
+
+        except Exception as exc:
+            st.error(f"دریافت دیتاست ناموفق بود: {exc}")
+            st.info(
+                "دسترسی فایل Google Drive را روی Anyone with the link و Viewer "
+                "قرار دهید یا فایل را از نوار کناری بارگذاری کنید."
+            )
+            st.stop()
 
 if not data_path.exists():
-    st.info(
-        "برای شروع، فایل خام مخصوص کلاس را در مسیر `data/WISDM_ar_v1.1_raw.txt` قرار دهید "
-        "یا از گزینهٔ بارگذاری در نوار کناری استفاده کنید."
-    )
+    st.error("فایل دیتاست پیدا نشد.")
     st.stop()
+
 
 mtime = data_path.stat().st_mtime
 try:
